@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Nossa Retrospectiva ❤️</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* { box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+
+  /* COR BASE (impede o branco) */
+  background-color: #120000;
+
+  /* FUNDO ROMÂNTICO */
+  background-image:
+    radial-gradient(circle at top, rgba(255, 90, 90, 0.35), rgba(18, 0, 0, 0.9) 70%),
+    radial-gradient(circle at bottom, rgba(160, 0, 0, 0.6), rgba(18, 0, 0, 1) 75%),
+    linear-gradient(180deg, #2b0000, #080000);
+
+  color: #fff;
+  overflow: hidden;
+}
+
+/* ---------- TELA INICIAL ---------- */
+.start {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 10;
+}
+
+.start img {
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.6);
+}
+
+.start h1 {
+  margin: 0;
+}
+
+.start p {
+  opacity: .7;
+  margin: 6px 0 20px;
+}
+
+.start button {
+  padding: 14px 34px;
+  border-radius: 30px;
+  border: none;
+  font-size: 18px;
+  background: #1db954;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ---------- APP ---------- */
+.app {
+  display: none;
+  height: 100vh;
+  padding: 16px;
+  flex-direction: column;
+}
+
+.photos {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+}
+
+.photo {
+  border-radius: 18px;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.1);
+  transition: all 1.2s ease;
+}
+
+.photo.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.story-text {
+  font-size: 22px;
+  text-align: center;
+  margin: 14px 0 6px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.story-text.show {
+  opacity: 1;
+}
+
+.lyric {
+  font-size: 15px;
+  opacity: .7;
+  text-align: center;
+  min-height: 22px;
+}
+
+/* ---------- CORAÇÕES ---------- */
+.heart {
+  position: fixed;
+  bottom: -20px;
+  color: rgba(255, 100, 150, .7);
+  animation: float 6s linear forwards;
+  pointer-events: none;
+}
+
+@keyframes float {
+  to {
+    transform: translateY(-110vh);
+    opacity: 0;
+  }
+}
+
+audio { display: none; }
+</style>
+</head>
+
+<body>
+
+<!-- TELA INICIAL -->
+<div class="start" id="start">
+  <img src="home.jpg" alt="Nossa foto">
+  <h1>Te amar muito melhor</h1><h4>(LUV U BETTER)</h4>
+  <p>Matheus e Carol</p>
+  <button onclick="start()">▶ Ver nossa retrospectiva</button>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="photos" id="photos"></div>
+  <div class="story-text show" id="storyText"></div>
+  <div class="lyric" id="lyric"></div>
+</div>
+
+<audio id="music" src="LL COOL J - Luv U Better.mp3"></audio>
+
+<script>
+/* ===== DADOS ===== */
+
+const lyrics = [
+{ time: 0, text: "Essa é para o minha número 1"},
+{ time: 5, text: "Essa é para o minha número 1"},
+{ time: 9, text: "Essa é para o minha número 1"},
+{ time: 14, text: "De verdade, amor, pois eu te amo❤️"},
+{ time: 21, text: "Isso é difícil de dizer"},
+{ time: 23, text: "Quero ter certeza de que vou fazer isso da maneira certa"},
+{ time: 26 , text: "Porque ultimamente tenho andado muito ocupado"},
+{ time: 28, text: "E sei que você não se sente mais valorizada como deveria"},
+{ time: 31, text: "Eu costumava te dizer que seu cabelo estava incrível"},
+{ time: 33, text: "Te beijava devagar e olhava nos seus olhos"},
+{ time: 36, text: "Agora eu falo de um jeito bem grosso"},
+{ time: 38, text: "Quase todas as frases são: (Você me dá nojo)"},
+{ time: 40, text: "Antigamente eu era sua escolha número um"},
+{ time: 43, text: "Agora seu coração tá partido e isso é difícil de consertar"},
+{ time: 46, text: "Eu tive que cavar fundo dentro de mim"},
+{ time: 48, text: "Porque não consigo te ver saindo com outra pessoa"},
+{ time: 51, text: "É uma longa jornada de volta ao lugar onde estávamos"},
+{ time: 53, text: "Quando eu tinha vergonha de admitir que estava apaixonado"},
+{ time: 56, text: "E você era minha boa garota que não iria desistir"},
+{ time: 58, text: "Não posso deixar a gente se auto-destruir"},
+{ time: 60, text: "Amor, sorria hoje"},
+{ time: 63, text: "Porque eu sempre estarei com você"},
+{ time: 67, text: "Eu vou te amar muito melhor"},
+{ time: 70, text: "Quando seus amigos te virem também"},
+{ time: 73, text: "Justo quando você acha que não há mais nada que eu possa fazer"},
+{ time: 77, text: "Eu vou te amar muito melhor"},
+{ time: 81, text: "Quando eu penso nas coisas que fizemos"},
+{ time: 84, text: "E penso em você tendo meus filhos"},
+{ time: 86, text: "E penso em nós compartilhando um berço"},
+{ time: 88, text: "Perder tudo isso, Deus me livre, Nunca"},
+{ time: 91, text: "Você merece flores e doces, as coisas simples"},
+{ time: 93, text: "Além das maquiagens, lingeries e anéis"},
+{ time: 96, text: "Em vez disso, ando por aí como se fosse um rei"},
+{ time: 99, text: "E ter você não é nada além de uma coisa só minha"},
+{ time: 101, text: "Eu até parei de te dizer que o amor era bom"},
+{ time: 104, text: "Muito ocupado me exibindo na quebrada"},
+{ time: 105, text: "Garota, me abraça forte, nunca solta"},
+{ time: 109, text: "Vou fazer isso bem devagar, amor, com calma"},
+{ time: 111, text: "Mais uma chance, meu amor, e não diga não"},
+{ time: 114, text: "Porque eu tenho um outro lado pra te mostrar"},
+{ time: 116, text: "Alguns dizem que o amor é doloroso, ajuda a crescer"},
+{ time: 119, text: "Bem, tá na hora da dor ir embora, entende?"},
+{ time: 121, text: "Amor, sorria hoje"},
+{ time: 124, text: "Porque eu sempre estarei com você"},
+{ time: 127, text: "Eu vou te amar muito melhor"},
+{ time: 131, text: "Quando seus amigos te virem também"},
+{ time: 134, text: "Justo quando você acha que não há mais nada que eu possa fazer"},
+{ time: 138, text: "Eu vou te amar muito melhor"},
+{ time: 142, text: "Você acha que eu quis te machucar? (Não)"},
+{ time: 145, text: "Você acha que eu quis te machucar? (Não)"},
+{ time: 146, text: "Então vamos, rir juntos, chorar juntos"},
+{ time: 150, text: "Se Deus quiser nós que vamos morrer juntos"},
+{ time: 152, text: "Você acha que eu quis te machucar? (Não)"},
+{ time: 155, text: "Você acha que eu quis te machucar? (Não)"},
+{ time: 157, text: "Então vamos, rir juntos, chorar juntos"},
+{ time: 160, text: "Se Deus quiser nós que vamos morrer juntos"},
+{ time: 162, text: "Esse é um novo eu, um novo de você"},
+{ time: 165, text: "Um dia novo, o céu tão azul"},
+{ time: 167, text: "Segura minha mão enquanto eu ando com você"},
+{ time: 170, text: "Senta no meu colo, deixa eu conversar com você"},
+{ time: 172, text: "Chega de jogos chamando você de nomes feios"},
+{ time: 175, text: "Agindo como se todas as mulheres fossem iguais"},
+{ time: 177, text: "Eu vou te amar melhor, minha mentalidade mudou"},
+{ time: 179, text: "A partir de hoje, nunca mais serei o mesmo"},
+{ time: 182, text: "Vou massagear suas costas, compartilhar meus sonhos"},
+{ time: 185, text: "Eu te amo, deixa eu te mostrar o que quero dizer"},
+{ time: 187, text: "Te dar o amor mais profundo que uma garota já viu"},
+{ time: 190, text: "Te observar dormir, tão pacífica e serena"},
+{ time: 192, text: "Um brinde à minha rainha, você está de volta na minha vida"},
+{ time: 195, text: "Mas dessa vez eu vou fazer certo"},
+{ time: 197, text: "Confia em mim, do fundo do meu coração"},
+{ time: 200, text: "Nada vai nos separar, prometo"},
+{ time: 202, text: "Amor, sorria hoje"},
+{ time: 205, text: "Porque eu sempre estarei com você"},
+{ time: 208, text: "Eu vou te amar muito melhor"},
+{ time: 212, text: "Quando seus amigos te virem também"},
+{ time: 215, text: "Justo quando você acha que não há mais nada que eu possa fazer"},
+{ time: 218, text: "Eu vou te amar muito melhor"},
+{ time: 222, text: "Amor, sorria hoje"},
+{ time: 225, text: "Porque eu sempre estarei com você"},
+{ time: 229, text: "Eu vou te amar muito melhor"},
+{ time: 232, text: "Quando seus amigos te virem também"},
+{ time: 235, text: "Justo quando você acha que não há mais nada que eu possa fazer"},
+{ time: 238, text: "Eu vou te amar muito melhor"},
+{ time: 250, text: ""}
+];
+
+const stories = [
+  {
+    start: 0,
+    text: "Eu me lembro perfeitamente do nosso primeiro encontro no BeerTap. Eu estava tão nervoso… meu coração batia tão rápido que parecia querer sair do peito. Mesmo assim, ali já dava pra sentir que algo especial estava começando.",
+    photos: ["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpeg"]
+  },
+  {
+    start: 30,
+    text: "No começo não foi nada fácil, mas a gente fazia dar certo. Assistíamos filmes por ligação, só pra sentir que estávamos juntos de alguma forma. Mesmo à distância, você já me fazia sentir em casa.",
+    photos: ["foto5.jpeg","foto6.jpeg","foto7.jpeg","foto8.jpeg"]
+  },
+  {
+    start: 60,
+    text: "Você fez de tudo para que eu conhecesse seus pais… até usou minha comida favorita como estratégia. Quando lembro disso, não tem como não sorrir e dar risada do quanto você já cuidava de mim.",
+    photos: ["foto9.jpeg","foto10.jpeg","foto11.jpeg","foto12.jpeg"]
+  },
+  {
+    start: 90,
+    text: "Em tão pouco tempo, você virou minha parceira de vida. Hoje eu simplesmente não consigo mais me imaginar sem você, sem seu jeito, sem sua presença.",
+    photos: ["foto13.jpeg","foto14.jpeg","foto15.jpeg","foto16.jpeg"]
+  },
+  {
+    start: 120,
+    text: "Parceira de rolê, de risadas e até de cachaça. A melhor mulher que eu poderia ter nesse mundo, aquela que transforma qualquer momento simples em algo inesquecível.",
+    photos: ["foto17.jpeg","foto18.jpeg","foto19.jpeg","foto20.jpeg"]
+  },
+  {
+    start: 150,
+    text: "Todas as noites da minha vida eu quero dormir ao seu lado. É ali que encontro paz, conforto e a certeza de que estou exatamente onde deveria estar.",
+    photos: ["foto21.jpeg","foto22.jpeg","foto23.jpeg","foto24.jpeg"]
+  },
+  {
+    start: 180,
+    text: "Eu amo estar com você. Amo seu sorriso, amo suas palhaçadas, amo até seus surtos. Existem infinitas maneiras de dizer o quanto eu te amo, e mesmo assim nenhuma parece suficiente.",
+    photos: ["foto25.jpeg","foto26.jpeg","foto27.jpeg","foto28.jpeg"]
+  },
+  {
+    start: 210,
+    text: "Espero que um dia você consiga entender tudo o que eu sinto por você, o quanto eu sou completamente louco por essa mulher incrível que hoje eu chamo de minha esposa.",
+    photos: ["foto29.jpeg","foto30.jpeg","foto31.jpeg","foto32.jpeg"]
+  },
+  {
+    start: 240,
+    text: "Dá pra imaginar que em tão pouco tempo a gente já viveu e viajou tanto? E mesmo assim, eu sinto que ainda é pouco… porque você merece o mundo inteiro.",
+    photos: ["foto33.jpeg","foto34.jpeg","foto35.jpeg","foto36.jpeg"]
+  },
+  {
+    start: 270,
+    text: "Em outubro eu precisei oficializar tudo isso. O tanto que eu te amo já não cabia mais só dentro de mim… parecia que meu coração ia explodir se eu não dissesse.",
+    photos: ["foto37.jpeg","foto38.jpeg","foto39.jpeg","foto40.jpeg"]
+  },
+  {
+    start: 300,
+    text: "Caminhando juntos, conquistando juntos, enfrentando tudo lado a lado. Pode ter certeza: nós ainda vamos ser o melhor casal desse mundo.",
+    photos: ["foto41.jpeg","foto42.jpeg","foto43.jpeg","foto44.jpeg"]
+  },
+  {
+    start: 330,
+    text: "Esse presente não é algo material. É só eu tentando mostrar, mesmo sem conseguir dizer tudo, o quanto eu te amo. Te amo, minha linda. Feliz Natal, e que você continue sempre assim comigo.",
+    photos: ["foto45.jpeg","foto46.jpeg","foto47.jpeg","foto48.jpeg"]
+  }
+];
+
+/* ===== ESTADO ===== */
+
+let lyricIndex = 0;
+let storyIndex = -1;
+let manualOverride = false;
+let appStarted = false;
+
+const audio = document.getElementById("music");
+const lyricEl = document.getElementById("lyric");
+const storyText = document.getElementById("storyText");
+const photosEl = document.getElementById("photos");
+
+/* ===== START ===== */
+
+function start() {
+  document.getElementById("start").style.display = "none";
+  document.getElementById("app").style.display = "flex";
+  audio.play();
+  heartInterval();
+  appStarted = true;
+}
+
+/* ===== SINCRONIA COM A MÚSICA ===== */
+
+audio.addEventListener("timeupdate", () => {
+  const t = audio.currentTime;
+
+  /* Letras */
+  if (lyricIndex < lyrics.length - 1 && t >= lyrics[lyricIndex + 1].time) {
+    lyricIndex++;
+    lyricEl.textContent = lyrics[lyricIndex].text;
+  }
+
+  /* Stories automáticos (somente se NÃO estiver manual) */
+if (!manualOverride) {
+  if (
+    storyIndex < stories.length - 1 &&
+    t >= stories[storyIndex + 1].start
+  ) {
+    storyIndex++;
+    loadStory(stories[storyIndex]);
+  }
+}
+
+});
+/* ===== LOAD STORY ===== */
+
+function loadStory(story) {
+  storyText.classList.remove("show");
+
+  setTimeout(() => {
+    storyText.textContent = story.text;
+    storyText.classList.add("show");
+  }, 400);
+
+  photosEl.innerHTML = "";
+
+  story.photos.forEach((src, i) => {
+    const div = document.createElement("div");
+    div.className = "photo";
+    div.style.backgroundImage = `url(${src})`;
+    photosEl.appendChild(div);
+
+    setTimeout(() => {
+      div.classList.add("show");
+    }, i * 300);
+  });
+}
+
+/* ===== STORY MANUAL ===== */
+
+function nextStory() {
+  if (storyIndex < stories.length - 1) {
+    manualOverride = true;
+    storyIndex++;
+    loadStory(stories[storyIndex]);
+
+    /* depois de alguns segundos, volta pro automático */
+    setTimeout(() => {
+      manualOverride = false;
+    }, 8000);
+  }
+}
+
+/* Clique em qualquer lugar da tela */
+document.body.addEventListener("click", () => {
+  if (!appStarted) return;
+  nextStory();
+});
+
+/* ===== CORAÇÕES ===== */
+
+function heartInterval() {
+  setInterval(() => {
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.textContent = "❤️";
+    h.style.left = Math.random() * 100 + "vw";
+    h.style.fontSize = 12 + Math.random() * 20 + "px";
+    document.body.appendChild(h);
+
+    setTimeout(() => h.remove(), 6000);
+  }, 700);
+}
+
+/* ===== INIT ===== */
+
+lyricEl.textContent = lyrics[0].text;
+</script>
+
+</body>
+</html>
